@@ -26,7 +26,7 @@ setup(
         'License :: OSI Approved :: BSD License',
         'Operating System :: OS Independent',
         'Programming Language :: Python',
-        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3.6',
         'Topic :: Internet :: WWW/HTTP',
         'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
     ],
@@ -34,7 +34,7 @@ setup(
 
     # Adds dependencies
     install_requires=[
-        'Django==1.8',
+        'Django==2.2',
         'django-auth-ldap',
         'httplib2',
         'python-ldap',

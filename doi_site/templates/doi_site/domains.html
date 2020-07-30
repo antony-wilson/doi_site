@@ -15,9 +15,9 @@
 		<td>
 		{% for user in profile.group.user_set.values %}
 			{% if forloop.last %}
-				{{user.first_name }} {{ user.last_name }}
+				{{user.first_name }} {{ user.last_name }} ({{ user.email }})
 			{% else %}
-				{{user.first_name }} {{ user.last_name }},
+				{{user.first_name }} {{ user.last_name }} ({{ user.email }}),
 			{% endif %}
 		{% endfor %}
 		</td>

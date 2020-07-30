@@ -7,7 +7,7 @@ from doi_site.settings import DATACITE_TEST_URL, DATACITE_URL
 
 class Mint(View):
 
-    @method_decorator(login_required)
+    #@method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
         return super(Mint, self).dispatch(*args, **kwargs)
 

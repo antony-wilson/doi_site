@@ -16,7 +16,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('doi_suffix', models.CharField(max_length=100, verbose_name=b'DOI suffix - http://1234.5432.')),
-                ('group', models.OneToOneField(to='auth.Group')),
+                ('group', models.OneToOneField(to='auth.Group', on_delete=models.CASCADE)),
             ],
         ),
     ]

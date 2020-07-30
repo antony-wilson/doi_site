@@ -2,6 +2,8 @@
 
 # pylint: disable=no-self-use
 
+from urllib.parse import urljoin
+
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import View
@@ -12,7 +14,6 @@ from mds.http.delete import delete_metadata
 from mds.http.get import get as _get
 from mds.http.helper import get_accept_header
 from mds.http.post import post_doi, post_media, post_metadata
-from urlparse import urljoin
 
 
 class MetadataView(View):
@@ -20,6 +21,7 @@ class MetadataView(View):
     Handle delete, head and get requests for metadata.
 
     """
+
     @method_decorator(csrf_exempt)
     @method_decorator(logged_in_or_basicauth())
     def dispatch(self, *args, **kwargs):
@@ -56,6 +58,7 @@ class MetadataPost(View):
     Handle post requests for metadata.
 
     """
+
     @method_decorator(csrf_exempt)
     @method_decorator(logged_in_or_basicauth())
     def dispatch(self, *args, **kwargs):
@@ -75,6 +78,7 @@ class DoiView(View):
     Handle post requests for DOIs and get and head requests for all DOIs.
 
     """
+
     @method_decorator(csrf_exempt)
     @method_decorator(logged_in_or_basicauth())
     def dispatch(self, *args, **kwargs):
@@ -171,4 +175,3 @@ class MediaView(View):
 
         """
         return post_media(request)
-

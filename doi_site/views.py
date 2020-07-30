@@ -1,11 +1,8 @@
-""" This module provides the views for the web pages. """
+from urllib.parse import urljoin
 
-# pylint: disable=no-self-use
-
-from urlparse import urljoin
-
-from django.contrib.auth.views import login as auth_login
-from django.contrib.auth.views import logout as auth_logout
+from django.contrib.auth import logout, authenticate, login
+from django.contrib.auth.decorators import login_required
+from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.views.generic import View
 from django.views.generic.list import ListView
@@ -18,7 +15,6 @@ from mds.http.get import get as _get
 from mds.models import GroupProfile
 
 
-# pylint: disable=too-many-ancestors
 class DoiList(ListView):
     """
     Display all the DOIs for this organisation.
@@ -35,8 +31,7 @@ class DoiList(ListView):
         try:
             return super(DoiList, self).get(request, *args, **kwargs)
         except ExternalError as ex:
-            context = {'message': ex.message}
-            context['is_testing'] = _is_test_url()
+            context = {'message': ex, 'is_testing': _is_test_url()}
             return render(request, 'doi_site/error.html', context)
 
     def get_queryset(self):
@@ -75,7 +70,7 @@ class HomeView(View):
         Get the home page.
 
         """
-        context = {'organisation_name' : ORGANISATION_NAME}
+        context = {'organisation_name': ORGANISATION_NAME}
         context['organisation_email'] = ORGANISATION_DOI_EMAIL
         context['is_testing'] = _is_test_url()
         return render(request, 'doi_site/index.html', context)
@@ -95,14 +90,13 @@ class Notes(View):
         Get the notes page.
 
         """
-        context = {'organisation_name' : ORGANISATION_NAME}
-        context['is_testing'] = _is_test_url()
+        context = {'organisation_name': ORGANISATION_NAME}
+        context['is_testing'] = True
         context['roles'] = getattr(settings, 'ROLES_URL', '')
         context['notes'] = getattr(settings, 'NOTES_URL', '')
         return render(request, 'doi_site/notes.html', context)
 
 
-# pylint: disable=too-many-ancestors
 class Domains(ListView):
     """
     Display the list of DOI domains.
@@ -121,23 +115,28 @@ class Domains(ListView):
         return context
 
 
-def login(request):
-    """
-    Display the login page.
+@login_required()
+def logout_view(request):
+    logout(request)
+    context = {'organisation_name': ORGANISATION_NAME}
+    context['organisation_email'] = ORGANISATION_DOI_EMAIL
+    context['is_testing'] = _is_test_url()
+    return render(request, 'registration/logged_out.html', context=context)
 
-    """
-    context = {'is_testing' : _is_test_url()}
-    context['organisation_name'] = ORGANISATION_NAME
-    return auth_login(request, extra_context=context)
 
+def login_user(request):
+    context = {'organisation_name': ORGANISATION_NAME, 'organisation_email': ORGANISATION_DOI_EMAIL,
+               'is_testing': _is_test_url()}
+    if request.POST:
+        username = request.POST['username']
+        password = request.POST['password']
 
-def logout(request):
-    """
-    Respond to a logout request.
-
-    """
-    context = {'is_testing' : _is_test_url()}
-    return auth_logout(request, extra_context=context)
+        user = authenticate(username=username, password=password)
+        if user is not None:
+            if user.is_active:
+                login(request, user)
+                return HttpResponseRedirect('/index/')
+    return render(request, 'registration/login.html', context=context)
 
 
 def _is_test_url():
@@ -151,4 +150,3 @@ def _is_test_url():
     if DATACITE_URL == DATACITE_TEST_URL:
         return True
     return False
-

@@ -9,7 +9,7 @@ class GroupProfile(models.Model):
     """
     Extension to Group model.
     """
-    group = models.OneToOneField('auth.Group', unique=True)
+    group = models.OneToOneField('auth.Group', unique=True, on_delete=models.CASCADE)
 
     # The segment of the URI after the site DOI URI that defines this domain
     # within site DOI name space

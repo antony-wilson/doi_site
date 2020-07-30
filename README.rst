@@ -54,7 +54,7 @@ Installation and Configuration
 Prerequisites
 -------------
 
-- Python => 2.7
+- Python == 3.6
 - python-virtualenv
 - gcc
 - mod_ssl.x86_64
@@ -64,6 +64,8 @@ Prerequisites
 
 Installation
 ------------
+
+Run the Anisble playbook to complete most of the installation or:
 
 Create the directory for the static files
 

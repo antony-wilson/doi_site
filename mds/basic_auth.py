@@ -12,6 +12,12 @@ from django.contrib.auth import authenticate, login
 from django.http import HttpResponse
 
 
+def is_authenticated(user):
+    if callable(user.is_authenticated):
+        return user.is_authenticated()
+    return user.is_authenticated
+
+
 def view_or_basicauth(view, request, test_func, realm="", *args, **kwargs):
     """
     This is a helper function used by both 'logged_in_or_basicauth' and
@@ -30,9 +36,10 @@ def view_or_basicauth(view, request, test_func, realm="", *args, **kwargs):
             # NOTE: We are only support basic authentication for now.
             #
             if auth[0].lower() == "basic":
-                uname, passwd = base64.b64decode(auth[1]).split(':', 1)
+                uname, passwd = ((base64.b64decode(auth[1])).decode('utf-8')).split(':', 1)
                 user = authenticate(username=uname, password=passwd)
                 if user is not None:
+
                     if user.is_active:
                         login(request, user)
                         request.user = user
@@ -78,10 +85,11 @@ def logged_in_or_basicauth(realm=""):
 
     You can provide the name of the realm to ask for authentication within.
     """
+
     def view_decorator(func):
         def wrapper(request, *args, **kwargs):
-            return view_or_basicauth(func, request,
-                                     lambda u: u.is_authenticated(),
-                                     realm, *args, **kwargs)
+            return view_or_basicauth(func, request, lambda u: is_authenticated(u), realm, *args, **kwargs)
+
         return wrapper
+
     return view_decorator

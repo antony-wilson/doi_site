@@ -5,14 +5,15 @@ This module is used to make HTTP HEAD and GET calls.
 import base64
 import logging
 import socket
+import urllib.error
+import urllib.parse
+import urllib.request
 from ssl import SSLError
-import urllib2
 
 from django.http import HttpResponse
 
 from doi_site.settings import DATACITE_USER_NAME, DATACITE_PASSWORD, TIME_OUT
 from mds.http.helper import get_response, get_opener
-
 
 LOGGING = logging.getLogger(__name__)
 
@@ -33,22 +34,21 @@ def get(request_method, url, headers):
     LOGGING.info('get(%s,%s,%s)', request_method, url, headers)
     _set_timeout()
     opener = get_opener()
-    auth_string = (base64.encodestring(DATACITE_USER_NAME + ':'
-                                       + DATACITE_PASSWORD)).rstrip()
-    headers.update({'Authorization':'Basic ' + auth_string})
-    req = urllib2.Request(url, data=None, headers=headers)
+    auth_string = (base64.encodebytes((DATACITE_USER_NAME + ':' + DATACITE_PASSWORD).encode())).rstrip()
+    headers.update({'Authorization': 'Basic ' + str(auth_string)})
+    req = urllib.request.Request(url, data=None, headers=headers)
     if request_method == "HEAD":
         req.get_method = lambda: 'HEAD'
     try:
         response = opener.open(req)
-    except (urllib2.HTTPError) as ex:
+    except (urllib.error.HTTPError) as ex:
         msg = ex.readlines()
         if ex.code in [404, 410]:
             LOGGING.info('HTTPError error getting %s. %s', url, msg)
         else:
             LOGGING.warn('HTTPError error getting %s. %s', url, msg)
         return get_response(msg, ex.code)
-    except (socket.timeout, urllib2.URLError) as ex:
+    except (socket.timeout, urllib.error.URLError) as ex:
         LOGGING.warn('Timeout or URLError error getting %s. %s', url, ex.reason)
         return get_response(ex.reason, 500)
     except (SSLError) as ex:
@@ -56,7 +56,7 @@ def get(request_method, url, headers):
         return get_response(ex, 500)
     finally:
         _close(opener)
-    if response.headers.has_key('Content-Type'):
+    if 'Content-Type' in response.headers:
         ret_response = HttpResponse(content_type=
                                     response.headers.get('Content-Type'))
     else:

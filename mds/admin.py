@@ -29,7 +29,6 @@ class MyGroupAdmin(GroupAdmin):
     inlines = [GroupProfileInline]
     list_display = ('name', 'get_doi')
 
-    # pylint: disable=no-self-use
     def get_doi(self, obj):
         """
         Get the DOI suffix.
